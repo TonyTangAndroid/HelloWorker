@@ -1,24 +1,25 @@
 package com.thetehnocafe.gurleensethi.workmanager;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 
 import androidx.work.Data;
 import androidx.work.Worker;
-
-import static android.content.Context.NOTIFICATION_SERVICE;
+import androidx.work.WorkerParameters;
 
 public class MyWorker extends Worker {
 
     public static final String EXTRA_TITLE = "title";
     public static final String EXTRA_TEXT = "text";
     public static final String EXTRA_OUTPUT_MESSAGE = "output_message";
+
+    public MyWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
 
     @NonNull
     @Override
@@ -31,8 +32,8 @@ public class MyWorker extends Worker {
             e.printStackTrace();
         }
 
-        String title = getInputData().getString(EXTRA_TITLE, "Default Title");
-        String text = getInputData().getString(EXTRA_TEXT, "Default Text");
+        String title = getInputData().getString(EXTRA_TITLE);
+        String text = getInputData().getString(EXTRA_TEXT);
 
         //sendNotification("Simple Work Manager", "I have been send by WorkManager!");
         sendNotification(title, text);
@@ -41,9 +42,7 @@ public class MyWorker extends Worker {
                 .putString(EXTRA_OUTPUT_MESSAGE, "I have come from MyWorker!")
                 .build();
 
-        setOutputData(output);
-
-        return Result.SUCCESS;
+        return Result.success(output);
     }
 
     public void sendNotification(String title, String message) {

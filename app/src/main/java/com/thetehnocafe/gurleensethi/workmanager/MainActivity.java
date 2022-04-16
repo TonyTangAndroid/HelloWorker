@@ -1,31 +1,22 @@
 package com.thetehnocafe.gurleensethi.workmanager;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.arch.lifecycle.Observer;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.Person;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.time.Duration;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import androidx.work.Configuration;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import androidx.work.WorkStatus;
+
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,19 +79,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        WorkManager.getInstance().getStatusById(simpleRequest.getId())
-                .observe(this, new Observer<WorkStatus>() {
-                    @Override
-                    public void onChanged(@Nullable WorkStatus workStatus) {
-                        if (workStatus != null) {
-                            mTextView.append("SimpleWorkRequest: " + workStatus.getState().name() + "\n");
-                        }
+        WorkManager instance = WorkManager.getInstance();
+        LiveData<WorkInfo> workInfoByIdLiveData = instance.getWorkInfoByIdLiveData(simpleRequest.getId());
+        workInfoByIdLiveData.observe(this, new Observer<WorkInfo>() {
+            @Override
+            public void onChanged(@Nullable WorkInfo workStatus) {
+                if (workStatus != null) {
+                    mTextView.append("SimpleWorkRequest: " + workStatus.getState().name() + "\n");
+                }
 
-                        if (workStatus != null && workStatus.getState().isFinished()) {
-                            String message = workStatus.getOutputData().getString(MyWorker.EXTRA_OUTPUT_MESSAGE, "Default message");
-                            mTextView.append("SimpleWorkRequest (Data): " + message);
-                        }
-                    }
-                });
+                if (workStatus != null && workStatus.getState().isFinished()) {
+                    String message = workStatus.getOutputData().getString(MyWorker.EXTRA_OUTPUT_MESSAGE);
+                    mTextView.append("SimpleWorkRequest (Data): " + message);
+                }
+            }
+        });
+
+
     }
 }
