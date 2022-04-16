@@ -22,6 +22,7 @@ public class SampleWorker extends Worker {
     public Result doWork() {
         sendNotification();
         doWorkInternal();
+        NotificationUtil.cancelNotification(getApplicationContext());
         return result();
     }
 
